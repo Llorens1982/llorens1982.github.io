@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutina en Bucle con Reloj - Video Local</title>
+    <style>
+        body { 
+            font-family: system-ui, -apple-system, sans-serif; 
+            max-width: 800px; margin: 2rem auto; text-align: center; background: #f4f4f9; 
+        }
+        .video-wrapper { 
+            position: relative; padding-bottom: 56.25%; height: 0; 
+            overflow: hidden; margin-bottom: 1rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 8px; background: #000;
+        }
+        .video-wrapper video { 
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; 
+        }
+        .timer-container {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+            margin: 10px 0 20px 0;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .controls { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; 
+        }
+        button { 
+            padding: 12px; font-weight: bold; cursor: pointer; border: none; 
+            border-radius: 6px; background-color: #2c3e50; color: white; transition: background 0.2s; 
+        }
+        button:hover { background-color: #34495e; }
+        button.active { background-color: #27ae60; }
+        .instructions {
+            background: #e8f4f8; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: left;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Circuito de Movilidad</h1>
+    
+    <div class="instructions">
+        <strong>Instrucciones:</strong>
+        <ol>
+            <li>Asegúrate de que el archivo se llame <strong>rutina.mp4</strong> y esté en esta misma carpeta.</li>
+            <li>Al hacer clic en un ejercicio, comenzará el bucle del video y <strong>la cuenta atrás de 65 segundos</strong> (5 seg de preparación + 60 seg de ejercicio).</li>
+        </ol>
+    </div>
+
+    <div class="video-wrapper">
+        <video id="myVideo" controls muted src="rutina.mp4">
+            Tu navegador no soporta el elemento de video.
+        </video>
+    </div>
+    
+    <!-- Reloj -->
+    <div id="timer-display" class="timer-container">01:05</div>
+
+    <div class="controls">
+        <button id="btn1" onclick="setLoop(62, 72, 'btn1')">1. Gateo (1 min)</button>
+        <button id="btn2" onclick="setLoop(153, 164, 'btn2')">2. Caminata Invertida (1 min)</button>
+        <button id="btn3" onclick="setLoop(244, 255, 'btn3')">3. Toques a Plancha (1 min)</button>
+        <button id="btn4" onclick="setLoop(372, 382, 'btn4')">4. Estiramiento Diagonal (10 reps)</button>
+    </div>
+
+    <script>
+        const video = document.getElementById('myVideo');
+        const timerDisplay = document.getElementById('timer-display');
+        
+        let loopStart = 62;
+        let loopEnd = 72;
+        let isLooping = false;
+        
+        let countdownInterval = null;
+        let timeLeft = 65; // 65 segundos en total
+
+        // Escuchar la actualización de tiempo del video nativo
+        video.addEventListener('timeupdate', () => {
+            if (isLooping && video.currentTime >= loopEnd) {
+                video.currentTime = loopStart;
+            }
+        });
+
+        function setLoop(start, end, btnId) {
+            loopStart = start;
+            loopEnd = end;
+            isLooping = true;
+            
+            // Actualizar botones (cambio de color visual)
+            document.querySelectorAll('button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(btnId).classList.add('active');
+            
+            // Iniciar el temporizador de 65 segundos
+            startTimer();
+
+            // Saltar al inicio del bucle y reproducir
+            video.currentTime = loopStart;
+            video.play();
+        }
+
+        function startTimer() {
+            clearInterval(countdownInterval);
+            timeLeft = 65; 
+            updateTimerDisplay();
+
+            countdownInterval = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(countdownInterval);
+                    timeLeft = 0;
+                    timerDisplay.style.color = '#e74c3c'; // Cambia a rojo al finalizar
+                    timerDisplay.innerHTML = "¡Tiempo!";
+                } else {
+                    updateTimerDisplay();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.style.color = '#2c3e50'; // Color por defecto
+            let minutes = Math.floor(timeLeft / 60);
+            let seconds = timeLeft % 60;
+            timerDisplay.innerHTML = 
+                (minutes < 10 ? "0" : "") + minutes + ":" + 
+                (seconds < 10 ? "0" : "") + seconds;
+        }
+    </script>
+</body>
+</html>
